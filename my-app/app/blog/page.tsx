@@ -6,6 +6,8 @@ import Link from "next/link";
 interface Post {
   id: number;
   title: string;
+  body: string;
+  category: "Tech" | "Lifestyle" | "Education"; // assign categories
 }
 
 export default function BlogPage() {
@@ -14,9 +16,15 @@ export default function BlogPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState<"All" | Post["category"]>("All");
 
-  const categories = ["All", "Tech", "Lifestyle", "Education"];
+  const categories: ("All" | Post["category"])[] = ["All", "Tech", "Lifestyle", "Education"];
+
+  // Assign random categories to posts
+  const assignCategory = (postId: number): Post["category"] => {
+    const map: Post["category"][] = ["Tech", "Lifestyle", "Education"];
+    return map[postId % map.length];
+  };
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -24,18 +32,25 @@ export default function BlogPage() {
         const res = await fetch("https://jsonplaceholder.typicode.com/posts");
         if (!res.ok) throw new Error(`Error ${res.status}`);
         const data = await res.json();
-        setPosts(data.slice(0, 20));
-        setFiltered(data.slice(0, 20));
+        // Add category
+        const postsWithCategory: Post[] = data.slice(0, 20).map((p: any, index: number) => ({
+          id: p.id,
+          title: p.title,
+          body: p.body,
+          category: assignCategory(index),
+        }));
+        setPosts(postsWithCategory);
+        setFiltered(postsWithCategory);
       } catch {
         setError("⚠️ Failed to load posts. Please check your connection.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchPosts();
   }, []);
 
+  // Filter posts by search & category
   useEffect(() => {
     const term = search.toLowerCase();
     const results = posts.filter((p) =>
@@ -44,9 +59,7 @@ export default function BlogPage() {
     setFiltered(
       selectedCategory === "All"
         ? results
-        : results.filter((p) =>
-            p.title.toLowerCase().includes(selectedCategory.toLowerCase())
-          )
+        : results.filter((p) => p.category === selectedCategory)
     );
   }, [search, posts, selectedCategory]);
 
@@ -54,8 +67,8 @@ export default function BlogPage() {
     <div className="flex flex-col md:flex-row max-w-7xl mx-auto p-8 gap-8 bg-gray-50 min-h-screen">
       {/* Sidebar */}
       <aside className="w-full md:w-1/3 bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800 text-center">
-          Discover Posts 📰
+        <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
+          Discover Posts
         </h2>
 
         {/* Search bar */}
@@ -77,6 +90,7 @@ export default function BlogPage() {
             </button>
           )}
         </div>
+
         {search && (
           <p className="text-sm text-gray-500 mb-4">
             Found {filtered.length} result{filtered.length !== 1 ? "s" : ""}
@@ -85,15 +99,13 @@ export default function BlogPage() {
 
         {/* Categories */}
         <div>
-          <h3 className="text-lg font-semibold mb-3 text-gray-700">
-            Categories
-          </h3>
+          <h3 className="text-lg font-semibold mb-3 text-gray-700">Categories</h3>
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
+                className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors duration-200 ${
                   selectedCategory === cat
                     ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                     : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
@@ -109,7 +121,7 @@ export default function BlogPage() {
       {/* Blog content */}
       <main className="flex-1 bg-white p-8 rounded-2xl shadow-md border border-gray-100">
         <h1 className="text-4xl font-extrabold mb-8 text-gray-900 text-center">
-           Blog Posts
+          Blog Posts
         </h1>
 
         {loading && (
@@ -135,6 +147,9 @@ export default function BlogPage() {
                       </h3>
                       <p className="text-sm text-indigo-600 font-medium">
                         Read more →
+                      </p>
+                      <p className="mt-2 text-xs text-gray-500 font-medium uppercase">
+                        {post.category}
                       </p>
                     </Link>
                   </li>
