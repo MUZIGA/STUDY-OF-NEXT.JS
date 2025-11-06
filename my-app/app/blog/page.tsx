@@ -1,23 +1,47 @@
 // app/blog/page.tsx
-export const revalidate = 3600; // revalidate every hour (SSG)
+import Link from "next/link";
 
-export default async function BlogPage() {
-  const res = await fetch("https://jsonplaceholder.typicode.com/posts");
-  const posts = await res.json();
+interface Post {
+  id: number;
+  title: string;
+}
+
+const BlogList = async () => {
+  let posts: Post[] = [];
+
+  try {
+    const res = await fetch("https://jsonplaceholder.typicode.com/posts", {
+      next: { revalidate: 10 },
+    });
+
+    if (!res.ok) {
+      console.warn("Failed to fetch posts:", res.status);
+      return <p>Failed to load posts.</p>;
+    }
+
+    posts = await res.json();
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return <p>Failed to load posts. Check your internet connection.</p>;
+  }
 
   return (
-    <section>
-      <h2 className="text-3xl font-bold mb-4">Blog Posts (SSG)</h2>
+    <div className="max-w-4xl mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Blog Posts</h1>
       <ul className="space-y-4">
-        {posts.slice(0, 5).map((post: any) => (
-          <li key={post.id} className="bg-white p-4 rounded-lg shadow-md">
-            <a href={`/blog/${post.id}`} className="text-indigo-600 hover:underline text-lg font-semibold">
+        {posts.slice(0, 10).map((post) => (
+          <li key={post.id} className="border-b pb-2">
+            <Link
+              href={`/blog/${post.id}`}
+              className="text-blue-600 hover:underline"
+            >
               {post.title}
-            </a>
-            <p className="text-gray-600 mt-2">{post.body.slice(0, 100)}...</p>
+            </Link>
           </li>
         ))}
       </ul>
-    </section>
+    </div>
   );
-}
+};
+
+export default BlogList;
