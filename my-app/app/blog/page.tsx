@@ -21,8 +21,8 @@ export default function BlogPage() {
   // Amabara ya category
   const categoryColors: Record<Post["category"], string> = {
     Tech: "bg-blue-100 text-blue-800",
-    Lifestyle: "bg-blue-100 text-green-800",
-    Education: "bg-blue-100 text-purple-800",
+    Lifestyle: "bg-blue-100 text-blue-800",
+    Education: "bg-blue-100 text-blue-800",
   };
 
   useEffect(() => {
