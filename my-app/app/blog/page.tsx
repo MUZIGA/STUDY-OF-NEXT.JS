@@ -3,6 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+interface RawPost {
+  id: number;
+  title: string;
+  userId: number;
+  body: string;
+}
+
 interface Post {
   id: number;
   title: string;
@@ -18,7 +25,7 @@ export default function BlogPage() {
 
   const categories: ("All" | Post["category"])[] = ["All", "Tech", "Lifestyle", "Education"];
 
-  // Amabara ya category
+  
   const categoryColors: Record<Post["category"], string> = {
     Tech: "bg-blue-100 text-blue-800",
     Lifestyle: "bg-blue-100 text-blue-800",
@@ -28,8 +35,8 @@ export default function BlogPage() {
   useEffect(() => {
     fetch("https://jsonplaceholder.typicode.com/posts")
       .then((res) => res.json())
-      .then((data) => {
-        const postsWithCat: Post[] = data.slice(0, 20).map((p: any, i: number) => ({
+      .then((data: RawPost[]) => {
+        const postsWithCat: Post[] = data.slice(0, 20).map((p: RawPost, i: number) => ({
           id: p.id,
           title: p.title,
           category: categories[(i % (categories.length - 1)) + 1] as Post["category"],
