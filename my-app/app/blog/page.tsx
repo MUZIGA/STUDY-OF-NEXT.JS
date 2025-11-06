@@ -18,6 +18,13 @@ export default function BlogPage() {
 
   const categories: ("All" | Post["category"])[] = ["All", "Tech", "Lifestyle", "Education"];
 
+  // Amabara ya category
+  const categoryColors: Record<Post["category"], string> = {
+    Tech: "bg-blue-100 text-blue-800",
+    Lifestyle: "bg-blue-100 text-green-800",
+    Education: "bg-blue-100 text-purple-800",
+  };
+
   useEffect(() => {
     fetch("https://jsonplaceholder.typicode.com/posts")
       .then((res) => res.json())
@@ -81,10 +88,14 @@ export default function BlogPage() {
             <Link
               key={p.id}
               href={`/blog/${p.id}`}
-              className="block p-4 rounded-lg bg-white shadow hover:shadow-md transition hover:bg-indigo-50"
+              className="block p-5 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1 hover:bg-indigo-50 bg-gradient-to-br from-white via-gray-50 to-white"
             >
-              <h3 className="font-semibold text-gray-800">{p.title}</h3>
-              <p className="text-xs text-gray-500 mt-1 uppercase">{p.category}</p>
+              <h3 className="font-semibold text-gray-800 mb-2">{p.title}</h3>
+              <span
+                className={`px-2 py-1 text-xs rounded-full font-medium ${categoryColors[p.category]}`}
+              >
+                {p.category}
+              </span>
             </Link>
           ))}
         </div>
