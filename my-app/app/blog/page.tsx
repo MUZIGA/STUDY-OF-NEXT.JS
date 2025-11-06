@@ -16,31 +16,43 @@ const BlogList = async () => {
 
     if (!res.ok) {
       console.warn("Failed to fetch posts:", res.status);
-      return <p>Failed to load posts.</p>;
+      return (
+        <div className="text-center text-red-600 mt-8">
+          Failed to load posts.
+        </div>
+      );
     }
 
     posts = await res.json();
   } catch (error) {
     console.error("Error fetching posts:", error);
-    return <p>Failed to load posts. Check your internet connection.</p>;
+    return (
+      <div className="text-center text-red-600 mt-8">
+        Failed to load posts. Check your internet connection.
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Blog Posts</h1>
-      <ul className="space-y-4">
-        {posts.slice(0, 10).map((post) => (
-          <li key={post.id} className="border-b pb-2">
+    <main className="flex justify-center min-h-screen bg-gray-50 p-6">
+      <section className="max-w-4xl w-full">
+        <h1 className="text-4xl font-bold mb-6 text-gray-800 text-center">
+          Blog Posts
+        </h1>
+
+        <div className="grid gap-6">
+          {posts.slice(0, 10).map((post) => (
             <Link
+              key={post.id}
               href={`/blog/${post.id}`}
-              className="text-blue-600 hover:underline"
+              className="block bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
             >
-              {post.title}
+              <h2 className="text-xl font-semibold text-gray-800">{post.title}</h2>
             </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+          ))}
+        </div>
+      </section>
+    </main>
   );
 };
 
