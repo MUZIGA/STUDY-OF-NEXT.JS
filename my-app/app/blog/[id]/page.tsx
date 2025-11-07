@@ -1,5 +1,6 @@
-// app/blog/[id]/page.tsx
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface Post {
@@ -8,49 +9,64 @@ interface Post {
   body: string;
 }
 
-interface BlogDetailProps {
-  params: { id: string };
-}
+export default function BlogDetail({ params }: { params: { id: string } }) {
+  const { id } = params;
+  const [post, setPost] = useState<Post | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
+        if (!res.ok) throw new Error("Post not found");
+        const data = await res.json();
+        setPost(data);
+      } catch {
+        setError("❌ Failed to load post. Please check your internet connection.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-const Message = ({ text }: { text: string }) => (
-  <div className="max-w-3xl mx-auto p-4">
-    <p>{text}</p>
-    <Link href="/blog" className="text-blue-600 hover:underline mt-2 inline-block">
-      ← Back to Blog List
-    </Link>
-  </div>
-);
+    fetchPost();
+  }, [id]);
 
-const BlogDetail = async ({ params }: BlogDetailProps) => {
-  const id = params?.id;
+  if (loading)
+    return <p className="text-center mt-10 text-gray-500">Loading post...</p>;
 
-  
-  if (!id) return <Message text="Invalid post ID." />;
+  if (error)
+    return (
+      <div className="text-center mt-10">
+        <p className="text-red-600 font-medium">{error}</p>
+        <Link href="/blog" className="text-blue-600 hover:underline mt-2 inline-block">
+          ← Back to Blog List
+        </Link>
+      </div>
+    );
 
-  let post: Post | null = null;
-
-  try {
-    const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
-    if (!res.ok) return <Message text="Post not found or unavailable." />;
-
-    post = await res.json();
-  } catch (error) {
-    console.error("Error fetching post:", error);
-    return <Message text="Failed to load post. Check your internet connection." />;
-  }
+  if (!post)
+    return (
+      <div className="text-center mt-10">
+        <p className="text-gray-600">⚠️ No post found.</p>
+        <Link href="/blog" className="text-blue-600 hover:underline mt-2 inline-block">
+          ← Back to Blog List
+        </Link>
+      </div>
+    );
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
-      <p>{post.body}</p>
-      <div className="mt-4">
-        <Link href="/blog" className="text-blue-600 hover:underline">
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded-2xl shadow-md mt-10">
+      <h1 className="text-3xl font-bold mb-4 text-gray-900">{post.title}</h1>
+      <p className="text-gray-700 leading-relaxed">{post.body}</p>
+      <div className="mt-6">
+        <Link
+          href="/blog"
+          className="text-indigo-600 hover:text-indigo-800 font-medium"
+        >
           ← Back to Blog List
         </Link>
       </div>
     </div>
   );
-};
-
-export default BlogDetail;
+}
