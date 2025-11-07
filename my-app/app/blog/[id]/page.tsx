@@ -9,11 +9,15 @@ interface Post {
   body: string;
 }
 
-export default function BlogDetail({ params }: { params: { id: string } }) {
+interface BlogDetailProps {
+  params: { id: string };
+}
+
+export default function BlogDetail({ params }: BlogDetailProps) {
   const { id } = params;
   const [post, setPost] = useState<Post | null>(null);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchPost = async () => {
